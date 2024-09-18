@@ -3,12 +3,13 @@ import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { createRoom } from "../http/create-room";
 import { toast } from "sonner";
+import { SyntheticEvent, useState } from "react";
 
 export function CreateRoom() {
+  const [theme, setTheme] = useState<string>("");
   const navigate = useNavigate();
-  const handleCreateRoom = async (data: FormData) => {
-    const theme = data.get("theme")?.toString();
-
+  const handleCreateRoom = async (event: SyntheticEvent) => {
+    event.preventDefault();
     if (!theme) {
       toast.error("No theme");
       return;
@@ -34,12 +35,14 @@ export function CreateRoom() {
           Create your room
         </p>
         <form
-          action={handleCreateRoom}
+          onSubmit={handleCreateRoom}
           className="flex items-center gap-2 bg-zinc-800 border p-2 rounded-xl border-zinc-600 ring-orange-400 ring-offset-2 ring-offset-zinc-800 focus-within:ring-1"
         >
           <input
             type="text"
             name="theme"
+            value={theme}
+            onChange={(value) => setTheme(value.target.value.toString())}
             placeholder="Name of Room"
             className="flex-1 text-sm bg-transparent mx-2 outline-none placeholder:text-zinc-500 text-zinc-100 "
             autoComplete="off"
