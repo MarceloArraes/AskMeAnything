@@ -5,6 +5,8 @@ import { messageReact } from "../http/create-message-reaction";
 import { messageAnswear } from "../http/answer-message";
 import { toast } from "sonner";
 import { removeMessage } from "../http/remove-message-reaction";
+import { markAnsweredMessage } from "../http/mark-answered-message";
+import Button from "./button";
 
 interface MessageProps {
   text?: string;
@@ -70,6 +72,16 @@ export function Message({
     }
   };
 
+  const handleMarkAsAnswered = async () => {
+    if (!roomId) return;
+    try {
+      await markAnsweredMessage({ messageId, roomId });
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Error marking message as answered");
+    }
+  };
+
   return (
     <li
       data-answered={answered}
@@ -77,13 +89,14 @@ export function Message({
     >
       {text}
       <input
-        className="mt-3 mb-3 flex items-center gap-2 flex-1 text-sm bg-transparent mx-2 outline-1 placeholder:text-zinc-500 text-zinc-100 "
+        className="mt-3 mb-3 flex items-center gap-2 flex-1 text-sm bg-transparent mx-2 border border-1 rounded p-2 outline-none border-slate-400 focus:border-slate-100 placeholder:text-zinc-500 text-zinc-100 "
         autoComplete="off"
         type="text"
         placeholder="Write an answer or feedback"
         value={messageAnswer ?? ""}
         onChange={handeAnswerMessage}
       />
+      <Button onClick={handleMarkAsAnswered}>Mark as Answered</Button>
       {hasReacted ? (
         <button
           type="button"
