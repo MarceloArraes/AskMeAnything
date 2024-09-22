@@ -77,7 +77,10 @@ export function Message({
     >
       {text}
       <input
-        className="flex items-center gap-2 text-zinc-300 text-sm mt-2"
+        className="mt-3 mb-3 flex items-center gap-2 flex-1 text-sm bg-transparent mx-2 outline-1 placeholder:text-zinc-500 text-zinc-100 "
+        autoComplete="off"
+        type="text"
+        placeholder="Write an answer or feedback"
         value={messageAnswer ?? ""}
         onChange={handeAnswerMessage}
       />
