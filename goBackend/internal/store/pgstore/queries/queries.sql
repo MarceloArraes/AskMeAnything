@@ -17,14 +17,14 @@ RETURNING "id";
 
 -- name: GetMessage :one
 SELECT
-    "id", "room_id", "message", "reaction_count", "answered"
+    "id", "room_id", "message", "reaction_count", "answered", "answear_message"
 FROM messages
 WHERE
     id = $1;
 
 -- name: GetRoomMessages :many
 SELECT
-    "id", "room_id", "message", "reaction_count", "answered"
+    "id", "room_id", "message", "reaction_count", "answered", "answear_message"
 FROM messages
 WHERE
     room_id = $1;
@@ -34,6 +34,12 @@ INSERT INTO messages
     ( "room_id", "message" ) VALUES
     ( $1, $2 )
 RETURNING "id";
+
+-- name: AnswerMessage :one
+UPDATE messages
+SET answear_message = $2
+WHERE id = $1
+RETURNING answear_message;
 
 -- name: ReactToMessage :one
 UPDATE messages

@@ -4,10 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { createRoom } from "../http/create-room";
 import { toast } from "sonner";
 import { SyntheticEvent, useState } from "react";
+import { getRooms } from "../http/get-all-rooms";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import RoomList from "../components/room-list";
+import Button from "../components/button";
 
 export function CreateRoom() {
   const [theme, setTheme] = useState<string>("");
   const navigate = useNavigate();
+
+  const { data } = useSuspenseQuery({
+    queryKey: ["rooms"],
+    queryFn: () => getRooms(),
+  });
+
   const handleCreateRoom = async (event: SyntheticEvent) => {
     event.preventDefault();
     if (!theme) {
@@ -25,6 +35,9 @@ export function CreateRoom() {
     }
 
     console.log("Theme", theme);
+  };
+  const handleEnterRoom = (roomId: string) => {
+    navigate(`/room/${roomId}`);
   };
 
   return (
@@ -44,17 +57,15 @@ export function CreateRoom() {
             value={theme}
             onChange={(value) => setTheme(value.target.value.toString())}
             placeholder="Name of Room"
-            className="flex-1 text-sm bg-transparent mx-2 outline-none placeholder:text-zinc-500 text-zinc-100 "
+            className="flex-1 text-sm bg-transparent mx-2 outline-none placeholder:text-zinc-500 text-zinc-100"
             autoComplete="off"
           />
-          <button
-            type="submit"
-            className="bg-orange-400 text-orange-950 px-3 py-1.5 font-medium text-sm gap-1.5 flex items-center rounded-lg hover:bg-orange-500"
-          >
+          <Button>
             Criar Sala
             <ArrowRight className="size-4" />
-          </button>
+          </Button>
         </form>
+        <RoomList rooms={data} onEnterRoom={handleEnterRoom} />
       </div>
     </main>
   );

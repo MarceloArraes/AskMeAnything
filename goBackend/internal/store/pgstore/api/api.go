@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -15,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type apiHandler struct {
@@ -66,6 +68,7 @@ func NewHandler(q *pgstore.Queries) http.Handler {
 						r.Get("/", a.handleGetRoomMessage)
 						r.Patch("/react", a.handleReactToMessage)
 						r.Delete("/react", a.handleRemoveReactFromMessage)
+						r.Post("/answer", a.handleAnswearMessage)
 						r.Patch("/answer", a.handleMarkMessageAsAnswered)
 					})
 				})
@@ -82,6 +85,7 @@ const (
 	MessageKindMessageRactionIncreased = "message_reaction_increased"
 	MessageKindMessageRactionDecreased = "message_reaction_decreased"
 	MessageKindMessageAnswered         = "message_answered"
+	MessageKindAnswerCreated           = "message_answer_created"
 )
 
 type MessageMessageReactionIncreased struct {
@@ -101,6 +105,10 @@ type MessageMessageAnswered struct {
 type MessageMessageCreated struct {
 	ID      string `json:"id"`
 	Message string `json:"message"`
+}
+type MessageMessageAnswerCreated struct {
+	ID            string      `json:"id"`
+	AnswerMessage pgtype.Text `json:"answear_message"`
 }
 
 type Message struct {
@@ -244,6 +252,56 @@ func (h apiHandler) handleCreateRoomMessage(w http.ResponseWriter, r *http.Reque
 	})
 }
 
+func (h apiHandler) handleAnswearMessage(w http.ResponseWriter, r *http.Request) {
+	_, rawRoomID, _, ok := h.readRoom(w, r)
+	if !ok {
+		return
+	}
+	// get the message_id from the url
+	rawID := chi.URLParam(r, "message_id")
+
+	id, err := uuid.Parse(rawID)
+	if err != nil {
+		http.Error(w, "invalid message id", http.StatusBadRequest)
+		return
+	}
+
+	type _body struct {
+		AnswerMessage pgtype.Text `json:"answerMessage"`
+	}
+	var body _body
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+
+	// how to see this: body.AnswerMessage on the console? (like a console log)
+	fmt.Println(body.AnswerMessage)
+
+	answerMessage, err := h.q.AnswerMessage(r.Context(), pgstore.AnswerMessageParams{ID: id, AnswearMessage: body.AnswerMessage})
+	if err != nil {
+		slog.Error("failed to insert message", "error", err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	type response struct {
+		AnswerMessage pgtype.Text `json:"answerMessage"`
+	}
+
+	sendJSON(w, response{AnswerMessage: answerMessage})
+
+	go h.notifyClients(Message{
+		Kind:   MessageKindAnswerCreated,
+		RoomID: rawRoomID,
+		Value: MessageMessageAnswerCreated{
+			ID:            rawID,
+			AnswerMessage: answerMessage,
+		},
+	})
+}
+
 func (h apiHandler) handleGetRoomMessages(w http.ResponseWriter, r *http.Request) {
 	_, _, roomID, ok := h.readRoom(w, r)
 	if !ok {
@@ -342,6 +400,7 @@ func (h apiHandler) handleRemoveReactFromMessage(w http.ResponseWriter, r *http.
 	}
 
 	count, err := h.q.RemoveReactionFromMessage(r.Context(), id)
+
 	if err != nil {
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		slog.Error("failed to react to message", "error", err)

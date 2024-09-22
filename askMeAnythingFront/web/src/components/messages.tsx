@@ -5,10 +5,6 @@ import { getRoomMessages } from "../http/get-room-messages";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMessagesWebsockets } from "../hooks/use-messages-websockets";
 
-/* "message_created"
-"message_reaction_increased"
-"message_reaction_decreased" */
-
 export function Messages() {
   const { roomId } = useParams();
 
@@ -37,6 +33,7 @@ export function Messages() {
         <Message
           key={item.id}
           messageId={item.id}
+          answer={item.answearMessage}
           amountOfReactions={item.amountOfReactions}
           text={item.text}
           answered={item.answered}

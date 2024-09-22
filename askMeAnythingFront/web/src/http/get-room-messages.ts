@@ -8,6 +8,7 @@ interface messageData {
   Message: string;
   ReactionCount: number;
   Answered: boolean;
+  AnswearMessage: string;
 }
 
 export interface GetRoomMessagesResponse {
@@ -20,6 +21,7 @@ export interface messageForFront {
   text: string;
   amountOfReactions: number;
   answered: boolean;
+  answearMessage: string;
 }
 
 export async function getRoomMessages({
@@ -40,6 +42,7 @@ export async function getRoomMessages({
         text: item.Message,
         amountOfReactions: item.ReactionCount,
         answered: item.Answered,
+        answearMessage: item.AnswearMessage,
       } as messageForFront;
     }),
   };

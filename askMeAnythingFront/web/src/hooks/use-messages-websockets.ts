@@ -16,20 +16,11 @@ type webHookMessage =
       value: { id: string; count: number };
     }
   | { kind: "message_reaction_decreased"; value: { id: string; count: number } }
-  | { kind: "message_answered"; value: { id: string } };
-
-// interface websocketDataFormat {
-//   kind:
-//     | "message_created"
-//     | "message_reaction_increased"
-//     | "message_reaction_decreased"
-//     | "message_answered";
-//   value: {
-//     id: string;
-//     count?: number;
-//     message?: string;
-//   };
-// }
+  | { kind: "message_answered"; value: { id: string } }
+  | {
+      kind: "message_answer_created";
+      value: { id: string; answearMessage: string };
+    };
 
 export function useMessagesWebsockets({ roomId }: UseMessagesWebsocketsParams) {
   const queryClient = useQueryClient();
@@ -48,6 +39,7 @@ export function useMessagesWebsockets({ roomId }: UseMessagesWebsocketsParams) {
       const data: webHookMessage = JSON.parse(event.data);
       console.log("DATA form websocket", data);
       switch (data.kind) {
+        // going in this one when it should not.
         case "message_created":
           queryClient.setQueryData(
             ["messages", roomId],
@@ -145,7 +137,31 @@ export function useMessagesWebsockets({ roomId }: UseMessagesWebsocketsParams) {
             }
           );
           break;
-
+        case "message_answer_created":
+          queryClient.setQueryData<GetRoomMessagesResponse>(
+            ["messages", roomId],
+            (state) => {
+              console.log("state ", state);
+              if (!state) {
+                return {
+                  messages: [],
+                };
+              }
+              return {
+                messages: [
+                  ...state.messages.map((message: messageForFront) => {
+                    if (message.id == data.value.id) {
+                      return {
+                        ...message,
+                      };
+                    }
+                    return message;
+                  }),
+                ],
+              };
+            }
+          );
+          break;
         default:
           break;
       }

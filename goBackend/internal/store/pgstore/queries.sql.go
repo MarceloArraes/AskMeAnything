@@ -9,11 +9,31 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const answerMessage = `-- name: AnswerMessage :one
+UPDATE messages
+SET answear_message = $2
+WHERE id = $1
+RETURNING answear_message
+`
+
+type AnswerMessageParams struct {
+	ID             uuid.UUID
+	AnswearMessage pgtype.Text
+}
+
+func (q *Queries) AnswerMessage(ctx context.Context, arg AnswerMessageParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, answerMessage, arg.ID, arg.AnswearMessage)
+	var answear_message pgtype.Text
+	err := row.Scan(&answear_message)
+	return answear_message, err
+}
 
 const getMessage = `-- name: GetMessage :one
 SELECT
-    "id", "room_id", "message", "reaction_count", "answered"
+    "id", "room_id", "message", "reaction_count", "answered", "answear_message"
 FROM messages
 WHERE
     id = $1
@@ -28,6 +48,7 @@ func (q *Queries) GetMessage(ctx context.Context, id uuid.UUID) (Message, error)
 		&i.Message,
 		&i.ReactionCount,
 		&i.Answered,
+		&i.AnswearMessage,
 	)
 	return i, err
 }
@@ -48,7 +69,7 @@ func (q *Queries) GetRoom(ctx context.Context, id uuid.UUID) (Room, error) {
 
 const getRoomMessages = `-- name: GetRoomMessages :many
 SELECT
-    "id", "room_id", "message", "reaction_count", "answered"
+    "id", "room_id", "message", "reaction_count", "answered", "answear_message"
 FROM messages
 WHERE
     room_id = $1
@@ -69,6 +90,7 @@ func (q *Queries) GetRoomMessages(ctx context.Context, roomID uuid.UUID) ([]Mess
 			&i.Message,
 			&i.ReactionCount,
 			&i.Answered,
+			&i.AnswearMessage,
 		); err != nil {
 			return nil, err
 		}
