@@ -40,7 +40,7 @@ COPY --from=build-backend /app/backend/.env /usr/local/bin/.env
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose the port Nginx will listen on
-EXPOSE 80
+EXPOSE 8082
 WORKDIR /usr/local/bin
 # Start both Nginx and the Go backend
 CMD ["/bin/sh", "-c", "/usr/local/bin/wsrs & nginx -g 'daemon off;'"]

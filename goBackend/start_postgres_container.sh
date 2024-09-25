@@ -38,4 +38,4 @@ echo "PostgreSQL is ready!"
 # You might need to run your Go app separately if it's not part of the container setup.
 echo "Building and starting the Go application..."
 docker build -t ask-me-anything -f ../Dockerfile .. # Use your Go Dockerfile context
-docker run -d --name ask-me-anything --network bridge ask-me-anything
+docker run -d --name ask-me-anything -p 8082:8082 --network bridge ask-me-anything
