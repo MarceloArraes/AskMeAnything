@@ -11,8 +11,11 @@ docker-compose up -d
 # Step 3: Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL to be ready..."
 until docker exec -it $(docker ps -q -f name=db) pg_isready > /dev/null 2>&1; do
+  echo "PostgreSQL is not ready yet. Checking logs..."
+  docker logs db  # Output the logs for debugging
   sleep 1
 done
+
 
 echo "PostgreSQL is ready!"
 
