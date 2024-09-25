@@ -13,10 +13,22 @@ docker-compose up -d
 
 # Step 3: Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL to be ready..."
-until docker exec -it $(docker ps -q -f "name=*db*") pg_isready > /dev/null 2>&1; do
-  echo "PostgreSQL is not ready yet. Checking logs..."
-  docker logs db  # Output the logs for debugging
+retry_count=0
+max_retries=10
+
+# Get the name of the PostgreSQL container
+pg_container_name=$(docker ps --format '{{.Names}}' | grep 'gobackend-db')
+
+# Loop until PostgreSQL is ready
+until docker exec -it "$pg_container_name" pg_isready > /dev/null 2>&1; do
   sleep 1
+  ((retry_count++))
+
+  if [ "$retry_count" -ge "$max_retries" ]; then
+    echo "PostgreSQL is not ready yet. Checking logs..."
+    docker logs "$pg_container_name"
+    exit 1
+  fi
 done
 
 
