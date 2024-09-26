@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    ports:
+      - ${WSRS_DATABASE_PORT:-5432}:5432
+    environment:
+      POSTGRES_USER: ${WSRS_DATABASE_USER}
+      POSTGRES_PASSWORD: ${WSRS_DATABASE_PASSWORD}
+      POSTGRES_DB: ${WSRS_DATABASE_NAME}
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 8081:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: marcelo@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+    environment:
+      WSRS_DATABASE_HOST: db
+      WSRS_DATABASE_PORT: 5432
+      WSRS_DATABASE_USER: ${WSRS_DATABASE_USER}
+      WSRS_DATABASE_PASSWORD: ${WSRS_DATABASE_PASSWORD}
+      WSRS_DATABASE_NAME: ${WSRS_DATABASE_NAME}
+
+volumes:
+  db:
+    driver: local
+  pgadmin:
+    driver: local
