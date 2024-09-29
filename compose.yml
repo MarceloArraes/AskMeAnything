@@ -30,11 +30,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:8082"
+      - "8080:8080"
     depends_on:
       - db
     environment:
-      WSRS_DATABASE_HOST: db
-      WSRS_DATABASE_PORT: 5432
+      WSRS_DATABASE_HOST: db # here maybe
+      WSRS_DATABASE_PORT: 5432 #here for sure.
       WSRS_DATABASE_USER: ${WSRS_DATABASE_USER}
       WSRS_DATABASE_PASSWORD: ${WSRS_DATABASE_PASSWORD}
       WSRS_DATABASE_NAME: ${WSRS_DATABASE_NAME}

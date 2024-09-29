@@ -179,7 +179,7 @@ func (h apiHandler) handleCreateRoom(w http.ResponseWriter, r *http.Request) {
 	roomID, err := h.q.InsertRoom(r.Context(), body.Theme)
 	if err != nil {
 		slog.Error("failed to insert room", "error", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong6", http.StatusInternalServerError)
 		return
 	}
 
@@ -193,7 +193,7 @@ func (h apiHandler) handleCreateRoom(w http.ResponseWriter, r *http.Request) {
 func (h apiHandler) handleGetRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := h.q.GetRooms(r.Context())
 	if err != nil {
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong7", http.StatusInternalServerError)
 		slog.Error("failed to get rooms", "error", err)
 		return
 	}
@@ -232,7 +232,7 @@ func (h apiHandler) handleCreateRoomMessage(w http.ResponseWriter, r *http.Reque
 	messageID, err := h.q.InsertMessage(r.Context(), pgstore.InsertMessageParams{RoomID: roomID, Message: body.Message})
 	if err != nil {
 		slog.Error("failed to insert message", "error", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong8", http.StatusInternalServerError)
 		return
 	}
 
@@ -282,7 +282,7 @@ func (h apiHandler) handleAnswearMessage(w http.ResponseWriter, r *http.Request)
 	answerMessage, err := h.q.AnswerMessage(r.Context(), pgstore.AnswerMessageParams{ID: id, AnswearMessage: body.AnswerMessage})
 	if err != nil {
 		slog.Error("failed to insert message", "error", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong9", http.StatusInternalServerError)
 		return
 	}
 
@@ -304,13 +304,14 @@ func (h apiHandler) handleAnswearMessage(w http.ResponseWriter, r *http.Request)
 
 func (h apiHandler) handleGetRoomMessages(w http.ResponseWriter, r *http.Request) {
 	_, _, roomID, ok := h.readRoom(w, r)
+
 	if !ok {
 		return
 	}
 
 	messages, err := h.q.GetRoomMessages(r.Context(), roomID)
 	if err != nil {
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong1", http.StatusInternalServerError)
 		slog.Error("failed to get room messages", "error", err)
 		return
 	}
@@ -343,7 +344,7 @@ func (h apiHandler) handleGetRoomMessage(w http.ResponseWriter, r *http.Request)
 		}
 
 		slog.Error("failed to get message", "error", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong2", http.StatusInternalServerError)
 		return
 	}
 
@@ -365,7 +366,7 @@ func (h apiHandler) handleReactToMessage(w http.ResponseWriter, r *http.Request)
 
 	count, err := h.q.ReactToMessage(r.Context(), id)
 	if err != nil {
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong3", http.StatusInternalServerError)
 		slog.Error("failed to react to message", "error", err)
 		return
 	}
@@ -402,7 +403,7 @@ func (h apiHandler) handleRemoveReactFromMessage(w http.ResponseWriter, r *http.
 	count, err := h.q.RemoveReactionFromMessage(r.Context(), id)
 
 	if err != nil {
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong4", http.StatusInternalServerError)
 		slog.Error("failed to react to message", "error", err)
 		return
 	}
@@ -438,7 +439,7 @@ func (h apiHandler) handleMarkMessageAsAnswered(w http.ResponseWriter, r *http.R
 
 	err = h.q.MarkMessageAsAnswered(r.Context(), id)
 	if err != nil {
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		http.Error(w, "something went wrong5", http.StatusInternalServerError)
 		slog.Error("failed to react to message", "error", err)
 		return
 	}

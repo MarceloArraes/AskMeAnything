@@ -20,7 +20,7 @@ max_retries=10
 pg_container_name=$(docker ps --format '{{.Names}}' | grep 'gobackend-db')
 
 # Loop until PostgreSQL is ready
-until docker exec -it "$pg_container_name" pg_isready > /dev/null 2>&1; do
+until docker exec -it "$pg_container_name" pg_isready -U ${WSRS_DATABASE_USER} > /dev/null 2>&1; do
   sleep 1
   ((retry_count++))
 
@@ -34,8 +34,23 @@ done
 
 echo "PostgreSQL is ready!"
 
+# Step 5: Check if the combined app container is running
+app_container_name=$(docker-compose ps -q app)
+if [ -z "$app_container_name" ]; then
+  echo "The app container is not running. Checking logs..."
+  docker-compose logs app
+  exit 1
+else
+  echo "The app container is running. Deployment successful!"
+fi
+
+# Optional: Print the logs of the app container
+echo "Printing the last 50 lines of app container logs:"
+docker-compose logs --tail 50 app
+
+
 # Step 4: Run Go application (if needed)
 # You might need to run your Go app separately if it's not part of the container setup.
-echo "Building and starting the Go application..."
-docker build -t ask-me-anything -f ../Dockerfile .. # Use your Go Dockerfile context
-docker run -d --name ask-me-anything -p 8082:8082 --network bridge ask-me-anything
+# echo "Building and starting the Go application..."
+# docker build -t ask-me-anything -f ../Dockerfile .. # Use your Go Dockerfile context
+# docker run -d --name ask-me-anything -p 8082:8082 --network bridge ask-me-anything
