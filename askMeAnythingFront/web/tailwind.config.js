@@ -2,7 +2,11 @@
 export default {
   content: ["./src/**/*.tsx", "./index.html"],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+      },
+    },
   },
   plugins: [],
 };

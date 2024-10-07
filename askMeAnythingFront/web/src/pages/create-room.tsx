@@ -43,8 +43,15 @@ export function CreateRoom() {
   return (
     <main className="h-screen flex items-center justify-center">
       <div className="max-w-[458px] flex flex-col gap-6">
-        <img className="h-10" height={70} width={50} src={logo} alt="logo" />
-        <p className="leading-relaxed text-zinc-300 text-center">
+        <div className="relative h-20 items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-gradient-radial from-orange-400 to-transparent blur-lg"></div>
+          <img
+            className="relative h-10 mt-5 ml-auto mr-auto"
+            src={logo}
+            alt="logo"
+          />
+        </div>
+        <p className="leading-relaxed text-zinc-300 text-center font-bold">
           Create your room
         </p>
         <form
